@@ -10,11 +10,11 @@
 
 <body>
 
-<form class="content" id="form" action="/" method="POST">
+<form class="content" id="form" action="index.php" method="POST">
   <h2 class="text-center">Форма</h2>
   
   <label for="fio" class="form-label">ФИО:</label>
-  <input class="form-control" name="fio" id="fio">
+  <input class="form-control" name="fio" id="fio" required>
 
   <label for="phone" class="form-label">Телефон: </label>
   <input class="form-control" type="tel" name="phone" id="phone" required />
@@ -23,15 +23,15 @@
   <input class="form-control" type="email" name="email" id="email" required />
 
   <label for="birthday" class="form-label">Дата рождения:</label>
-  <input class="form-control" type="date" name="data" id="birthday" />
+  <input class="form-control" type="date" name="data" id="birthday" required />
 
   <label class="form-label">Пол:</label>
   <div class="form-check">
-    <input class="form-check-input" type="radio" name="sex" value="male" id="male" />
+    <input class="form-check-input" type="radio" name="sex" value="male" id="male" required />
     <label class="form-check-label" for="male">Мужской</label>
   </div>
   <div class="form-check">
-    <input class="form-check-input" type="radio" name="sex" value="female" id="female" />
+    <input class="form-check-input" type="radio" name="sex" value="female" id="female" required />
     <label class="form-check-label" for="female">Женский</label>
   </div>
 
@@ -44,21 +44,23 @@
     <option value="5">PHP</option>
     <option value="6">Python</option>
     <option value="7">Java</option>
-    <option value="8">Haskel</option>
+    <option value="8">Haskell</option>
     <option value="9">Clojure</option>
     <option value="10">Prolog</option>
     <option value="11">Scala</option>
   </select>
 
   <label class="form-label" for="biography">Биография:</label>
-  <textarea class="form-control" id="biography" name="biog"></textarea>
+  <textarea class="form-control" id="biography" name="biog" required></textarea>
 
   <div class="form-check">
-    <input class="form-check-input" type="checkbox" name="agree" value="yes" id="checkbox" />
+    <input class="form-check-input" type="checkbox" name="agree" value="yes" id="checkbox" required />
     <label class="form-check-label" for="checkbox">Ознакомлен(а)</label>
   </div>
 
   <button class="btn btn-primary w-100 mt-2" type="submit">Сохранить</button>
 </form>
+
 </body>
 </html>
+

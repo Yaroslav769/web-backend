@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $errors[$field] = !empty($_COOKIE[$field . '_error']);
         if ($errors[$field]) {
             setcookie($field . '_error', '', 100000);
+            $messages[] = "<div class='error'>Ошибка в поле $field.</div>";
         }
     }
 

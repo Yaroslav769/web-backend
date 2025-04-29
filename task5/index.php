@@ -71,6 +71,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
 $errors = FALSE;
 
+if (empty($_POST['fio']) || !preg_match('/^[\p{L} ]+$/u', $_POST['fio'])) {
+    setcookie('fio_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('fio_value', $_POST['fio'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['phone']) || !preg_match('/^\+?[8][0-9]{10}$/', $_POST['phone'])) {
+    setcookie('phone_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('phone_value', $_POST['phone'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['email']) || !preg_match('/^[^@]+@[^@]+\.[a-z]{2,}$/i', $_POST['email'])) {
+    setcookie('email_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('email_value', $_POST['email'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['data']) || !DateTime::createFromFormat('Y-m-d', $_POST['data'])) {
+    setcookie('data_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('data_value', $_POST['data'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['sex']) || !in_array($_POST['sex'], ['male', 'female'])) {
+    setcookie('sex_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('sex_value', $_POST['sex'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['languages']) || !is_array($_POST['languages'])) {
+    setcookie('languages_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+} else {
+    $valid_languages = [1,2,3,4,5,6,7,8,9,10,11];
+    foreach ($_POST['languages'] as $lang_id) {
+        if (!in_array($lang_id, $valid_languages)) {
+            setcookie('languages_error', '1', time() + 24 * 60 * 60);
+            $errors = TRUE;
+            break;
+        }
+    }
+    setcookie('languages_value', implode(',', $_POST['languages']), time() + 30 * 24 * 60 * 60);
+}
+
+if (empty($_POST['biog']) || !preg_match('/^[\p{L}0-9\s.,!?()\[\]"\-]+$/u', $_POST['biog'])) {
+    setcookie('biog_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+}
+setcookie('biog_value', $_POST['biog'], time() + 30 * 24 * 60 * 60);
+
+if (empty($_POST['agree'])) {
+    setcookie('agree_error', '1', time() + 24 * 60 * 60);
+    $errors = TRUE;
+} else {
+    setcookie('agree_value', 'yes', time() + 30 * 24 * 60 * 60);
+}
+
+if ($errors) {
+    header('Location: index.php');
+    exit();
+}
+
 foreach (['fio', 'phone', 'email', 'data', 'sex', 'languages', 'biog', 'agree'] as $field) {
     setcookie($field . '_error', '', 100000);
 }
@@ -151,4 +214,10 @@ try {
 setcookie('save', '1');
 header('Location: index.php');
 ?>
+
+<?php if (!empty($_SESSION['login'])): ?>
+    <form action="out.php" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+<?php endif; ?>
  

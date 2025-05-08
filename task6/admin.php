@@ -5,46 +5,36 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
     header('Location: login.php');
     exit();
 }
+
 echo "<h1>Добро пожаловать, Администратор!</h1>";
 
 try {
     $db = new PDO('mysql:host=localhost;dbname=u68765', 'u68765', '9756853', [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
-
-    if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
-        $id = (int)$_GET['id'];
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        if ($stmt->rowCount() > 0) {
-            $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
-            $stmt->execute([$id]);
-            echo "Запись удалена!";
-        } else {
-            echo "Пользователь не найден!";
-        }
-    }
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-        $id = (int)$_POST['id'];
-        $login = $_POST['login'];
-        $password = md5($_POST['password']);
-
-        $stmt = $db->prepare("UPDATE users SET login = ?, pass = ? WHERE id = ?");
-        $stmt->execute([$login, $password, $id]);
-        echo "Запись обновлена!";
-    }
-
-    $editData = null;
-    if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
-        $id = (int)$_GET['id'];
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        $editData = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    $stmt = $db->query("SELECT * FROM users");
+    
+    $stmt = $db->query("SELECT users.id, users.form_id, login, fio, phone, email, date1, sex, biog 
+                        FROM users 
+                        JOIN form ON users.form_id = form.id");
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt = $db->query("SELECT check_id, language_id FROM lang_check");
+    $user_languages = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $user_languages[$row['check_id']] = $row['language_id'];
+    }
+
+    $stmt = $db->query("SELECT id, name FROM languages");
+    $languages = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $languages[$row['id']] = $row['name'];
+    }
+
+    $stmt = $db->query("SELECT languages.name, COUNT(*) AS count 
+                        FROM lang_check 
+                        JOIN languages ON lang_check.language_id = languages.id 
+                        GROUP BY languages.name");
+    $lang_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     echo "Ошибка: " . $e->getMessage();
@@ -61,31 +51,54 @@ try {
 <body>
 <h2>Управление пользователями</h2>
 
-<?php if ($editData): ?>
-    <h3>Редактировать пользователя</h3>
-    <form method="POST">
-        <input type="hidden" name="id" value="<?= $editData['id'] ?>">
-        Логин: <input type="text" name="login" value="<?= $editData['login'] ?>" required><br>
-        Новый пароль: <input type="password" name="password" required><br>
-        <button type="submit" name="update">Обновить</button>
-    </form>
-<?php endif; ?>
-
 <h3>Список пользователей</h3>
 <table border="1">
     <tr>
         <th>ID</th>
         <th>Логин</th>
+        <th>ФИО</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Дата рождения</th>
+        <th>Пол</th>
+        <th>Биография</th>
+        <th>Любимый язык программирования</th>
         <th>Действия</th>
     </tr>
     <?php foreach ($users as $user): ?>
         <tr>
             <td><?= $user['id'] ?></td>
             <td><?= $user['login'] ?></td>
+            <td><?= $user['fio'] ?></td>
+            <td><?= $user['phone'] ?></td>
+            <td><?= $user['email'] ?></td>
+            <td><?= $user['date1'] ?></td>
+            <td><?= $user['sex'] ?></td>
+            <td><?= $user['biog'] ?></td>
             <td>
-                <a href="?action=edit&id=<?= $user['id'] ?>">Редактировать</a>
+                <?php 
+                $language_id = isset($user_languages[$user['form_id']]) ? $user_languages[$user['form_id']] : null;
+                echo $language_id ? $languages[$language_id] : 'Не указан';
+                ?>
+            </td>
+            <td>
+                <a href="edit_user.php?id=<?= $user['form_id'] ?>">Редактировать</a>
                 <a href="?action=delete&id=<?= $user['id'] ?>" onclick="return confirm('Удалить пользователя?');">Удалить</a>
             </td>
+        </tr>
+    <?php endforeach; ?>
+</table>
+
+<h2>Статистика по языкам программирования</h2>
+<table border="1">
+    <tr>
+        <th>Язык</th>
+        <th>Количество пользователей</th>
+    </tr>
+    <?php foreach ($lang_stats as $stat): ?>
+        <tr>
+            <td><?= $stat['name'] ?></td>
+            <td><?= $stat['count'] ?></td>
         </tr>
     <?php endforeach; ?>
 </table>
